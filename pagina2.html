@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Par ou Ímpar - Blue Dark</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #8ba3c7;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .number-input {
+            width: 100%;
+            background: rgba(79, 172, 254, 0.1);
+            border: 2px solid #4facfe;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.2);
+            background: rgba(79, 172, 254, 0.15);
+        }
+
+        .number-input::placeholder {
+            color: #8ba3c7;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            flex: 1;
+            background: rgba(79, 172, 254, 0.2);
+            border: 1px solid #4facfe;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: rgba(79, 172, 254, 0.3);
+            border-color: #00f2fe;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-color: #4facfe;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            border-color: #00f2fe;
+        }
+
+        .result-container {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result {
+            text-align: center;
+        }
+
+        .number-display {
+            font-size: 4rem;
+            font-weight: 200;
+            margin-bottom: 16px;
+            color: #4facfe;
+            text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+        }
+
+        .status {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .status.par {
+            color: #00f2fe;
+        }
+
+        .status.impar {
+            color: #ff6b9d;
+        }
+
+        .description {
+            color: #8ba3c7;
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #4facfe, transparent);
+            margin: 30px auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #8ba3c7;
+            margin-top: 4px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(79, 172, 254, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 242, 254, 0.8); }
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #4facfe;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            top: 60%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .particle:nth-child(3) {
+            bottom: 30%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        .particle:nth-child(4) {
+            top: 40%;
+            right: 10%;
+            animation-delay: 1s;
+        }
+
+        .particle:nth-child(5) {
+            bottom: 20%;
+            right: 40%;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); opacity: 0.3; }
+            50% { transform: translateY(-20px); opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="glow">Par ou Ímpar</h1>
+            <p class="subtitle">Verificação em Blue Dark</p>
+        </div>
+
+        <div class="input-container">
+            <input type="number" 
+                   class="number-input" 
+                   id="numero" 
+                   placeholder="Digite um número inteiro"
+                   min="0">
+        </div>
+
+        <div class="button-group">
+            <button class="btn" onclick="limpar()">Limpar</button>
+            <button class="btn btn-primary" onclick="verificarNumero()">Verificar</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-container" id="resultado"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="totalVerificacoes">0</div>
+                <div class="stat-label">Verificações</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="totalPares">0</div>
+                <div class="stat-label">Pares</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="totalImpares">0</div>
+                <div class="stat-label">Ímpares</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalVerificacoes = 0;
+        let totalPares = 0;
+        let totalImpares = 0;
+
+        function verificarNumero() {
+            const numero = document.getElementById('numero').value;
+            const resultado = document.getElementById('resultado');
+            
+            if (numero === '') {
+                mostrarMensagem('Por favor, digite um número válido.', 'error');
+                return;
+            }
+            
+            const num = parseInt(numero);
+            const isPar = num % 2 === 0;
+            
+            // Atualizar estatísticas
+            totalVerificacoes++;
+            if (isPar) {
+                totalPares++;
+            } else {
+                totalImpares++;
+            }
+            
+            atualizarEstatisticas();
+            
+            // Mostrar resultado
+            resultado.innerHTML = `
+                <div class="result">
+                    <div class="number-display pulse">${num}</div>
+                    <div class="status ${isPar ? 'par' : 'impar'}">
+                        ${isPar ? 'PAR' : 'ÍMPAR'}
+                    </div>
+                    <div class="description">
+                        ${isPar ? 'Divisível por 2' : 'Não divisível por 2'}
+                    </div>
+                </div>
+            `;
+            
+            resultado.className = 'result-container show fade-in';
+            
+            // Adicionar efeito de pulse
+            setTimeout(() => {
+                resultado.querySelector('.number-display').classList.add('pulse');
+            }, 100);
+        }
+        
+        function limpar() {
+            document.getElementById('numero').value = '';
+            document.getElementById('resultado').innerHTML = '';
+            document.getElementById('resultado').className = 'result-container';
+        }
+        
+        function mostrarMensagem(mensagem, tipo) {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = `
+                <div class="result">
+                    <div class="status" style="color: ${tipo === 'error' ? '#ff6b9d' : '#4facfe'}">
+                        ${mensagem}
+                    </div>
+                </div>
+            `;
+            resultado.className = 'result-container show fade-in';
+        }
+        
+        function atualizarEstatisticas() {
+            document.getElementById('totalVerificacoes').textContent = totalVerificacoes;
+            document.getElementById('totalPares').textContent = totalPares;
+            document.getElementById('totalImpares').textContent = totalImpares;
+        }
+        
+        // Permitir verificação com Enter
+        document.getElementById('numero').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verificarNumero();
+            }
+        });
+        
+        // Focar no input quando a página carregar
+        window.addEventListener('load', function() {
+            document.getElementById('numero').focus();
+        });
+        
+        // Validar entrada para aceitar apenas números
+        document.getElementById('numero').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (value && !/^\d+$/.test(value)) {
+                e.target.value = value.replace(/\D/g, '');
+            }
+        });
+    </script>
+</body>
+</html> 

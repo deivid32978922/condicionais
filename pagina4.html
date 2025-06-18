@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Jogo Par ou Ímpar - Adivinhe!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-area {
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .number-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number-hidden {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .number-revealed {
+            animation: numberReveal 0.8s ease-out;
+            color: #fff;
+        }
+
+        @keyframes numberReveal {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(0deg); opacity: 0.7; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .choice-btn {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 150px;
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .choice-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-par {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .btn-impar {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .choice-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .result {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result.correct {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .result.incorrect {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #feca57;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .streak {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            animation: streakGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes streakGlow {
+            from { box-shadow: 0 0 10px rgba(254, 202, 87, 0.5); }
+            to { box-shadow: 0 0 20px rgba(254, 202, 87, 0.8); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #feca57;
+            animation: confettiFall 3s linear forwards;
+            pointer-events: none;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin: 10px 0;
+            animation: emojiBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes emojiBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .choice-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .choice-btn {
+                width: 200px;
+            }
+            
+            .number-display {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Par ou Ímpar</h1>
+        <p class="subtitle">Adivinhe se o número gerado é par ou ímpar!</p>
+
+        <div class="game-area">
+            <div class="number-display" id="numberDisplay">
+                <span class="number-hidden">???</span>
+            </div>
+
+            <button class="generate-btn" onclick="gerarNumero()" id="generateBtn">
+                🎲 Gerar Número
+            </button>
+
+            <div class="choice-buttons" id="choiceButtons" style="display: none;">
+                <button class="choice-btn btn-par" onclick="fazerEscolha('par')">
+                    🟢 PAR
+                </button>
+                <button class="choice-btn btn-impar" onclick="fazerEscolha('impar')">
+                    🔴 ÍMPAR
+                </button>
+            </div>
+
+            <div class="result" id="result"></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalJogos">0</div>
+                <div class="stat-label">Jogos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="acertos">0</div>
+                <div class="stat-label">Acertos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="erros">0</div>
+                <div class="stat-label">Erros</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="porcentagem">0%</div>
+                <div class="stat-label">Taxa de Acerto</div>
+            </div>
+        </div>
+
+        <div class="streak" id="streak" style="display: none;">
+            🔥 Sequência de acertos: <span id="streakCount">0</span>
+        </div>
+
+        <button class="reset-btn" onclick="resetarJogo()">
+            🔄 Resetar Estatísticas
+        </button>
+    </div>
+
+    <script>
+        let numeroAtual = null;
+        let totalJogos = 0;
+        let acertos = 0;
+        let erros = 0;
+        let sequenciaAtual = 0;
+
+        function gerarNumero() {
+            // Gerar número aleatório entre 1 e 100
+            numeroAtual = Math.floor(Math.random() * 100) + 1;
+            
+            // Mostrar "???" primeiro
+            const numberDisplay = document.getElementById('numberDisplay');
+            numberDisplay.innerHTML = '<span class="number-hidden">???</span>';
+            
+            // Esconder botão de gerar e mostrar botões de escolha
+            document.getElementById('generateBtn').style.display = 'none';
+            document.getElementById('choiceButtons').style.display = 'flex';
+            
+            // Limpar resultado anterior
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('result').className = 'result';
+            
+            // Adicionar efeito de suspense
+            setTimeout(() => {
+                numberDisplay.innerHTML = `<span class="number-revealed">${numeroAtual}</span>`;
+            }, 1000);
+        }
+
+        function fazerEscolha(escolha) {
+            if (numeroAtual === null) return;
+            
+            const isPar = numeroAtual % 2 === 0;
+            const acertou = (escolha === 'par' && isPar) || (escolha === 'impar' && !isPar);
+            
+            totalJogos++;
+            
+            if (acertou) {
+                acertos++;
+                sequenciaAtual++;
+                mostrarResultado('correct', `🎉 PARABÉNS! Você acertou! ${numeroAtual} é ${isPar ? 'PAR' : 'ÍMPAR'}! 🎉`);
+                criarConfete();
+            } else {
+                erros++;
+                sequenciaAtual = 0;
+                mostrarResultado('incorrect', `😅 Ops! Você errou! ${numeroAtual} é ${isPar ? 'PAR' : 'ÍMPAR'}! 😅`);
+            }
+            
+            atualizarEstatisticas();
+            atualizarSequencia();
+            
+            // Desabilitar botões de escolha
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Mostrar botão de gerar novamente após 2 segundos
+            setTimeout(() => {
+                document.getElementById('generateBtn').style.display = 'inline-block';
+                document.getElementById('choiceButtons').style.display = 'none';
+                document.querySelectorAll('.choice-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+                numeroAtual = null;
+            }, 2000);
+        }
+
+        function mostrarResultado(tipo, mensagem) {
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <div class="emoji">${tipo === 'correct' ? '🎉' : '😅'}</div>
+                <div>${mensagem}</div>
+            `;
+            result.className = `result show ${tipo}`;
+        }
+
+        function atualizarEstatisticas() {
+            document.getElementById('totalJogos').textContent = totalJogos;
+            document.getElementById('acertos').textContent = acertos;
+            document.getElementById('erros').textContent = erros;
+            
+            const porcentagem = totalJogos > 0 ? Math.round((acertos / totalJogos) * 100) : 0;
+            document.getElementById('porcentagem').textContent = porcentagem + '%';
+        }
+
+        function atualizarSequencia() {
+            const streakElement = document.getElementById('streak');
+            const streakCountElement = document.getElementById('streakCount');
+            
+            if (sequenciaAtual > 1) {
+                streakCountElement.textContent = sequenciaAtual;
+                streakElement.style.display = 'block';
+            } else {
+                streakElement.style.display = 'none';
+            }
+        }
+
+        function criarConfete() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confete = document.createElement('div');
+                    confete.className = 'confetti';
+                    confete.style.left = Math.random() * 100 + 'vw';
+                    confete.style.top = '-10px';
+                    confete.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                    confete.style.animationDelay = Math.random() * 2 + 's';
+                    
+                    document.body.appendChild(confete);
+                    
+                    setTimeout(() => {
+                        confete.remove();
+                    }, 3000);
+                }, i * 50);
+            }
+        }
+
+        function resetarJogo() {
+            if (confirm('Tem certeza que deseja resetar todas as estatísticas?')) {
+                totalJogos = 0;
+                acertos = 0;
+                erros = 0;
+                sequenciaAtual = 0;
+                
+                atualizarEstatisticas();
+                atualizarSequencia();
+                
+                document.getElementById('result').innerHTML = '';
+                document.getElementById('result').className = 'result';
+                document.getElementById('numberDisplay').innerHTML = '<span class="number-hidden">???</span>';
+                document.getElementById('generateBtn').style.display = 'inline-block';
+                document.getElementById('choiceButtons').style.display = 'none';
+                numeroAtual = null;
+            }
+        }
+
+        // Carregar estatísticas salvas (se existirem)
+        window.addEventListener('load', function() {
+            const savedStats = localStorage.getItem('parImparStats');
+            if (savedStats) {
+                const stats = JSON.parse(savedStats);
+                totalJogos = stats.totalJogos || 0;
+                acertos = stats.acertos || 0;
+                erros = stats.erros || 0;
+                atualizarEstatisticas();
+            }
+        });
+
+        // Salvar estatísticas quando mudarem
+        function salvarEstatisticas() {
+            const stats = {
+                totalJogos: totalJogos,
+                acertos: acertos,
+                erros: erros
+            };
+            localStorage.setItem('parImparStats', JSON.stringify(stats));
+        }
+
+        // Salvar estatísticas a cada atualização
+        const originalAtualizarEstatisticas = atualizarEstatisticas;
+        atualizarEstatisticas = function() {
+            originalAtualizarEstatisticas();
+            salvarEstatisticas();
+        };
+    </script>
+</body>
+</html> 
